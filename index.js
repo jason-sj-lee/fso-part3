@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 const app = express()
 
@@ -46,18 +48,15 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(person => {
+    response.json(person)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-
-  if (person) {
+  Person.findById(request.params.id).then(person => {
     response.json(person)
-  } else {
-    response.status(404).end()
-  }
+  })
 })
 
 app.get('/info', (request, response) => {
@@ -77,7 +76,6 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
-  console.log(body)
 
   if (!body.name || !body.number) {
     return response.status(400).json({
@@ -93,26 +91,26 @@ app.post('/api/persons', (request, response) => {
     }
   }
 
-  const name = body.name
-  const number = body.number
-
   const id = getRandomInt(100)
-  const newPerson = {
-    id: id,
-    name: name,
-    number: number
-  }
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
+  
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 
-  persons = persons.concat(newPerson)
+  // persons = persons.concat(newPerson)
 
-  response.json(newPerson)
+  // response.json(newPerson)
 })
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max)
 }
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
