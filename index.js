@@ -92,13 +92,13 @@ app.post('/api/persons', (request, response) => {
 
   for (const person of persons) {
     if (body.name === person.name) {
+      console.log('hello')
       return response.status(400).json({
         error: 'name must be unique'
       })
     }
   }
 
-  const id = getRandomInt(100)
   const person = new Person({
     name: body.name,
     number: body.number
@@ -107,15 +107,7 @@ app.post('/api/persons', (request, response) => {
   person.save().then(savedPerson => {
     response.json(savedPerson)
   })
-
-  // persons = persons.concat(newPerson)
-
-  // response.json(newPerson)
 })
-
-const getRandomInt = (max) => {
-  return Math.floor(Math.random() * max)
-}
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
